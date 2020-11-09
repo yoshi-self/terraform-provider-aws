@@ -21,6 +21,18 @@ func wafv2EmptySchema() *schema.Schema {
 	}
 }
 
+func wafv2EmptySchemaDeprecated() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+		Deprecated: "Not supported by WAFv2 API",
+	}
+}
+
 func wafv2RootStatementSchema(level int) *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -595,31 +607,23 @@ func expandWafv2FieldToMatch(l []interface{}) *wafv2.FieldToMatch {
 	m := l[0].(map[string]interface{})
 	f := &wafv2.FieldToMatch{}
 
+	// While the FieldToMatch struct allows more than 1 of its fields to be set,
+	// the WAFv2 API does not.
+	// Reference: https://github.com/terraform-providers/terraform-provider-aws/issues/14248
+
 	if v, ok := m["all_query_arguments"]; ok && len(v.([]interface{})) > 0 {
 		f.AllQueryArguments = &wafv2.AllQueryArguments{}
-	}
-
-	if v, ok := m["body"]; ok && len(v.([]interface{})) > 0 {
+	} else if v, ok := m["body"]; ok && len(v.([]interface{})) > 0 {
 		f.Body = &wafv2.Body{}
-	}
-
-	if v, ok := m["method"]; ok && len(v.([]interface{})) > 0 {
+	} else if v, ok := m["method"]; ok && len(v.([]interface{})) > 0 {
 		f.Method = &wafv2.Method{}
-	}
-
-	if v, ok := m["query_string"]; ok && len(v.([]interface{})) > 0 {
+	} else if v, ok := m["query_string"]; ok && len(v.([]interface{})) > 0 {
 		f.QueryString = &wafv2.QueryString{}
-	}
-
-	if v, ok := m["single_header"]; ok && len(v.([]interface{})) > 0 {
+	} else if v, ok := m["single_header"]; ok && len(v.([]interface{})) > 0 {
 		f.SingleHeader = expandWafv2SingleHeader(m["single_header"].([]interface{}))
-	}
-
-	if v, ok := m["single_query_argument"]; ok && len(v.([]interface{})) > 0 {
+	} else if v, ok := m["single_query_argument"]; ok && len(v.([]interface{})) > 0 {
 		f.SingleQueryArgument = expandWafv2SingleQueryArgument(m["single_query_argument"].([]interface{}))
-	}
-
-	if v, ok := m["uri_path"]; ok && len(v.([]interface{})) > 0 {
+	} else if v, ok := m["uri_path"]; ok && len(v.([]interface{})) > 0 {
 		f.UriPath = &wafv2.UriPath{}
 	}
 
