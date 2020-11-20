@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -16,12 +17,12 @@ func TestAccDataSourceAwsArn_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceAwsArnConfig,
+				Config: testAccDataSourceAwsArnConfig(endpoints.EuWest1RegionID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceAwsArn(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "partition", "aws"),
 					resource.TestCheckResourceAttr(resourceName, "service", "rds"),
-					resource.TestCheckResourceAttr(resourceName, "region", "eu-west-1"),
+					resource.TestCheckResourceAttr(resourceName, "region", endpoints.EuWest1RegionID),
 					resource.TestCheckResourceAttr(resourceName, "account", "123456789012"),
 					resource.TestCheckResourceAttr(resourceName, "resource", "db:mysql-db"),
 				),
@@ -41,9 +42,11 @@ func testAccDataSourceAwsArn(name string) resource.TestCheckFunc {
 	}
 }
 
-//lintignore:AWSAT003,AWSAT005
-const testAccDataSourceAwsArnConfig = `
+//lintignore:AWSAT005
+func testAccDataSourceAwsArnConfig(region string) string {
+	return fmt.Sprintf(`
 data "aws_arn" "test" {
-  arn = "arn:aws:rds:eu-west-1:123456789012:db:mysql-db"
+  arn = "arn:aws:rds:%s:123456789012:db:mysql-db"
 }
-`
+`, region)
+}
