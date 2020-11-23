@@ -592,7 +592,7 @@ resource "aws_vpc" "foo" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = %q
+    Name = %[1]q
   }
 }
 
@@ -611,7 +611,7 @@ resource "aws_subnet" "sn1" {
   availability_zone = data.aws_availability_zones.available.names[0]
 
   tags = {
-    Name = "%s_1"
+    Name = "%[1]s_1"
   }
 }
 
@@ -621,7 +621,7 @@ resource "aws_subnet" "sn2" {
   availability_zone = data.aws_availability_zones.available.names[1]
 
   tags = {
-    Name = "%s_2"
+    Name = "%[1]s_2"
   }
 }
 
@@ -631,37 +631,37 @@ resource "aws_subnet" "sn3" {
   availability_zone = data.aws_availability_zones.available.names[2]
 
   tags = {
-    Name = "%s_3"
+    Name = "%[1]s_3"
   }
 }
 
 resource "aws_security_group" "sg1" {
   vpc_id = aws_vpc.foo.id
-  name   = "%s_1"
+  name   = "%[1]s_1"
 
   tags = {
-    Name = "%s_1"
+    Name = "%[1]s_1"
   }
 }
 
 resource "aws_security_group" "sg2" {
   vpc_id = aws_vpc.foo.id
-  name   = "%s_2"
+  name   = "%[1]s_2"
 
   tags = {
-    Name = "%s_2"
+    Name = "%[1]s_2"
   }
 }
-`, name, name, name, name, name, name, name, name)
+`, name)
 }
 
 func testAccRoute53ResolverRuleConfig_resolverEndpoint(name string) string {
 	return fmt.Sprintf(`
-%s
+%[1]s
 
 resource "aws_route53_resolver_endpoint" "foo" {
   direction = "OUTBOUND"
-  name      = "%s_1"
+  name      = "%[2]s_1"
 
   security_group_ids = [
     aws_security_group.sg1.id,
@@ -678,7 +678,7 @@ resource "aws_route53_resolver_endpoint" "foo" {
 
 resource "aws_route53_resolver_endpoint" "bar" {
   direction = "OUTBOUND"
-  name      = "%s_2"
+  name      = "%[2]s_2"
 
   security_group_ids = [
     aws_security_group.sg1.id,
@@ -692,16 +692,16 @@ resource "aws_route53_resolver_endpoint" "bar" {
     subnet_id = aws_subnet.sn3.id
   }
 }
-`, testAccRoute53ResolverRuleConfig_resolverVpc(name), name, name)
+`, testAccRoute53ResolverRuleConfig_resolverVpc(name), name)
 }
 
 func testAccRoute53ResolverRuleConfig_resolverEndpointRecreate(name string) string {
 	return fmt.Sprintf(`
-%s
+%[1]s
 
 resource "aws_route53_resolver_endpoint" "foo" {
   direction = "OUTBOUND"
-  name      = "%s_1"
+  name      = "%[2]s_1"
 
   security_group_ids = [
     aws_security_group.sg2.id,
@@ -718,7 +718,7 @@ resource "aws_route53_resolver_endpoint" "foo" {
 
 resource "aws_route53_resolver_endpoint" "bar" {
   direction = "OUTBOUND"
-  name      = "%s_2"
+  name      = "%[2]s_2"
 
   security_group_ids = [
     aws_security_group.sg1.id,
@@ -732,5 +732,5 @@ resource "aws_route53_resolver_endpoint" "bar" {
     subnet_id = aws_subnet.sn3.id
   }
 }
-`, testAccRoute53ResolverRuleConfig_resolverVpc(name), name, name)
+`, testAccRoute53ResolverRuleConfig_resolverVpc(name), name)
 }
